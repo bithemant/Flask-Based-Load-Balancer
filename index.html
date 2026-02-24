@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fraud Email Detector</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    /* ----- Global ----- */
+    :root {
+      --bg: linear-gradient(135deg, #1d2671, #c33764);
+      --text: #fff;
+      --card-bg: rgba(255, 255, 255, 0.12);
+      --btn-bg: #ff4b2b;
+      --btn-hover: #ff6b4a;
+    }
+    body.light {
+      --bg: linear-gradient(135deg, #f0f0f0, #d9d9d9);
+      --text: #333;
+      --card-bg: rgba(0, 0, 0, 0.05);
+      --btn-bg: #0078ff;
+      --btn-hover: #3395ff;
+    }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: var(--bg);
+      transition: all 0.4s ease;
+      color: var(--text);
+    }
+    /* ----- Card ----- */
+    .container {
+      background: var(--card-bg);
+      backdrop-filter: blur(15px);
+      border-radius: 20px;
+      padding: 40px;
+      width: 400px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      transition: all 0.3s ease;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 20px;
+    }
+    /* ----- Input ----- */
+    .input-box {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .input-box input {
+      width: 100%;
+      padding: 12px 40px 12px 15px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      font-size: 16px;
+    }
+    .input-box i {
+      position: absolute;
+      right: 15px;
+      top: 12px;
+      color: #888;
+    }
+    /* ----- Button ----- */
+    button {
+      background: var(--btn-bg);
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s ease;
+      width: 100%;
+    }
+    button:hover {
+      background: var(--btn-hover);
+    }
+    /* ----- Toggle Mode ----- */
+    .toggle-mode {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      cursor: pointer;
+      font-size: 20px;
+    }
+    /* ----- Toast ----- */
+    .toast {
+      position: fixed;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      min-width: 250px;
+      padding: 15px 20px;
+      border-radius: 10px;
+      font-weight: bold;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+      opacity: 0;
+      transition: all 0.5s ease;
+      z-index: 1000;
+    }
+    .toast.show {
+      top: 30px;
+      opacity: 1;
+    }
+    .toast.success {
+      background: #4caf50;
+      color: #fff;
+    }
+    .toast.error {
+      background: #ff4b2b;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="toggle-mode" onclick="toggleMode()">
+    <i class="fas fa-moon"></i>
+  </div>
+
+  <div class="container">
+    <h1><i class="fas fa-shield-alt"></i> Fraud Email Detector</h1>
+    <div class="input-box">
+      <input type="email" id="emailInput" placeholder="Enter Email Address" required />
+      <i class="fas fa-envelope"></i>
+    </div>
+    <button onclick="checkEmail()">Check Email</button>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    let fraudEmails = [];
+
+    // Load fraud emails from Excel
+    async function loadExcel() {
+      const response = await fetch("fraud_emails.xlsx");
+      const data = await response.arrayBuffer();
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      fraudEmails = XLSX.utils.sheet_to_json(sheet, { header: 1 }).flat();
+      fraudEmails = fraudEmails.map(e => e.toString().trim().toLowerCase());
+    }
+
+    // Toast message function
+    function showToast(message, type) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.className = `toast ${type} show`;
+      setTimeout(() => {
+        toast.className = "toast"; 
+      }, 3000);
+    }
+
+    // Check Email
+    async function checkEmail() {
+      if (fraudEmails.length === 0) await loadExcel();
+
+      const email = document.getElementById("emailInput").value.trim().toLowerCase();
+      if (!email) {
+        showToast("⚠️ Please enter an email!", "error");
+        return;
+      }
+
+      if (fraudEmails.includes(email)) {
+        showToast("🚨 Fraud Email Detected!", "error");
+      } else {
+        showToast("✅ This Email is Trustworthy", "success");
+      }
+    }
+
+    // Dark/Light mode toggle
+    function toggleMode() {
+      document.body.classList.toggle("light");
+      const icon = document.querySelector(".toggle-mode i");
+      icon.classList.toggle("fa-moon");
+      icon.classList.toggle("fa-sun");
+    }
+  </script>
+</body>
+</html>
