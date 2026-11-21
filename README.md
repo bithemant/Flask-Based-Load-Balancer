@@ -26,10 +26,10 @@ Three Flask backend servers run on ports 5001, 5002 and 5003. The load balancer 
 
 ## How to run
 
-There is no `requirements.txt` in this repo, so install the two dependencies first:
+Install the dependencies first:
 
 ```bash
-pip install flask requests
+pip install -r requirements.txt
 ```
 
 Start the three backend servers (each in its own terminal):
