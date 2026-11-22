@@ -60,6 +60,5 @@ ngrok http 8080
 Flask-Based-Load-Balancer/
 ├── load_balancer.py   # Round-robin proxy on port 8080, plus the Minesweeper game at /game
 ├── backend.py         # Simple backend server; takes --port and --name arguments
-├── index.html         # Leftover file in the repo, not used by the load balancer
 └── README.md          # This file
 ```
